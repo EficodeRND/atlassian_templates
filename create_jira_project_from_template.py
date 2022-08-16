@@ -23,11 +23,11 @@ if __name__ == '__main__':
     project_key = get_parameter('PROJECT_KEY', True)
     project_name = get_parameter('PROJECT_NAME', True)
     project_lead = get_parameter('PROJECT_LEAD', True)
+    jira_project_type = get_parameter('JIRA_PROJECT_TYPE', True)
     template_project_id = get_parameter('TEMPLATE_PROJECT_ID', True)
     template_board_ids = get_parameter('TEMPLATE_BOARD_IDS', False)
     jira_username = get_parameter('JIRA_USERNAME', True)
     jira_token = get_parameter('JIRA_TOKEN', True)
-    jira_project_type = get_parameter('JIRA_PROJECT_TYPE', True)
 
     project_url = jira_service.create_project_from_template(jira_url=jira_url,
                                                             project_key=project_key,
@@ -39,12 +39,14 @@ if __name__ == '__main__':
 
     if jira_project_type == "JIRA_BUSINESS_PROJECT":
         if template_board_ids is None or len(template_board_ids) <= 0:
-            raise Exception("Template board id's not defined")
+            raise Exception("Template board ids not defined")
         template_board_ids = "".join(template_board_ids.split())
         board_ids = template_board_ids.split(',')
         project_url = jira_service.copy_board_from_template(jira_url=jira_url,
                                                             project_key=project_key,
-                                                            board_ids=board_ids)
+                                                            board_ids=board_ids,
+                                                            jira_username=jira_username,
+                                                            jira_token=jira_token)
 
     result = {'result': {
         'projectKey': project_key,

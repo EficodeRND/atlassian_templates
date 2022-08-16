@@ -22,7 +22,6 @@ def create_project_from_template(jira_url: str, project_key: str, project_name: 
 
     authentication = HTTPBasicAuth(jira_username, jira_token)
 
-
     payload = {
         "key": project_key,
         "name": project_name,
@@ -51,6 +50,24 @@ def copy_board_from_template(jira_url: str, project_key: str, board_ids: list, j
         response = requests.get(board_url, headers=HEADERS, auth=authentication)
         if response.status_code != 200:
             raise Exception(f"Reading board name failed {response.text}")
+
         board_name = f"{project_key} {response.json()['name']}"
+        log.info("Creating board %s", board_name)
+        payload = {
+            "name": board_name
+        }
+        copy_board_url = f"{board_url}copy"
+        response = requests.put(copy_board_url, json=payload, headers=HEADERS, auth=authentication)
+        if response.status_code != 200:
+            raise Exception(f"Board creation failed {response.text}")
+
+        board_id = response.json()['id']
+        payload['id'] = board_id
+        update_board_url = f"{jira_url}/rest/greenhopper/1.0/rapidviewconfig/name"
+        response = requests.put(update_board_url, json=payload, headers=HEADERS, auth=authentication)
+        return response.text
+
+
+
 
 
