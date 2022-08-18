@@ -36,15 +36,17 @@ def create_project_from_template(jira_url: str, project_key: str, project_name: 
     if response.status_code != 200:
         raise Exception(f"Project creation failed {response.text}")
 
-    return f"{jira_url}/{response.json()['returnUrl']}"
+    return f"{jira_url}/{response.json()['returnUrl']}", response.json()['projectId']
 
 
-def copy_board_from_template(jira_url: str, project_key: str, board_ids: list, jira_username: str, jira_token: str):
+def copy_board_from_template(jira_url: str, project_key: str, project_name: str, board_ids: list, jira_username: str,
+                             jira_token: str, project_id: str):
 
     log.info("Creating Jira boards %s", board_ids)
 
     authentication = HTTPBasicAuth(jira_username, jira_token)
 
+    result = []
     for board_id in board_ids:
         board_url = f"{jira_url}/rest/greenhopper/1.0/rapidview/{board_id}/"
         response = requests.get(board_url, headers=HEADERS, auth=authentication)
@@ -60,13 +62,58 @@ def copy_board_from_template(jira_url: str, project_key: str, board_ids: list, j
         response = requests.put(copy_board_url, json=payload, headers=HEADERS, auth=authentication)
         if response.status_code != 200:
             raise Exception(f"Board creation failed {response.text}")
+        result.append(board_name)
 
         board_id = response.json()['id']
         payload['id'] = board_id
         update_board_url = f"{jira_url}/rest/greenhopper/1.0/rapidviewconfig/name"
         response = requests.put(update_board_url, json=payload, headers=HEADERS, auth=authentication)
-        return response.text
+        if response.status_code != 200:
+            raise Exception(f"Board creation failed {response.text}")
 
+        log.info("Creating filters")
+
+        issuetype = "Epic"
+        name = board_name.lower()
+        if "bug" in name:
+            issuetype = "Bug"
+        elif "story" in name:
+            issuetype = "Story"
+
+        jql = f"Project = {project_key} AND Issuetype = {issuetype}"
+        payload = {
+            "jql": jql,
+            "name": f"{project_key} {issuetype}",
+            "description": f"Filter for {board_name}"
+        }
+        create_filter_url = f"{jira_url}/rest/api/2/filter"
+        response = requests.post(create_filter_url, json=payload, headers=HEADERS, auth=authentication)
+        filter_id = response.json()["id"]
+
+        payload = {
+            "type": "project",
+            "projectId": project_id,
+            "view": "true",
+            "edit": "false"
+        }
+        response = requests.post(f"{jira_url}/rest/api/2/filter/{filter_id}/permission", json=payload, headers=HEADERS,
+                                 auth=authentication)
+        if response.status_code != 201:
+            raise Exception(f"Failed to add view permissions to filter {response.status_code}")
+
+        payload = {
+            "type": "projectRole",
+            "projectId": project_id,
+            "projectRoleId": "10002",
+            "view": "true",
+            "edit": "true"
+        }
+        response = requests.post(f"{jira_url}/rest/api/2/filter/{filter_id}/permission", json=payload, headers=HEADERS,
+                                 auth=authentication)
+        if response.status_code != 201:
+            raise Exception(f"Failed to add edit permissions to filter {response.text}")
+
+    return result
 
 
 

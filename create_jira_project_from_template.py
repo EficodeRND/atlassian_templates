@@ -29,13 +29,13 @@ if __name__ == '__main__':
     jira_username = get_parameter('JIRA_USERNAME', True)
     jira_token = get_parameter('JIRA_TOKEN', True)
 
-    project_url = jira_service.create_project_from_template(jira_url=jira_url,
-                                                            project_key=project_key,
-                                                            project_name=project_name,
-                                                            project_lead=project_lead,
-                                                            template_project_id=template_project_id,
-                                                            jira_username=jira_username,
-                                                            jira_token=jira_token)
+    project_url, project_id = jira_service.create_project_from_template(jira_url=jira_url,
+                                                                        project_key=project_key,
+                                                                        project_name=project_name,
+                                                                        project_lead=project_lead,
+                                                                        template_project_id=template_project_id,
+                                                                        jira_username=jira_username,
+                                                                        jira_token=jira_token)
 
     if jira_project_type == "JIRA_BUSINESS_PROJECT":
         if template_board_ids is None or len(template_board_ids) <= 0:
@@ -44,9 +44,11 @@ if __name__ == '__main__':
         board_ids = template_board_ids.split(',')
         project_url = jira_service.copy_board_from_template(jira_url=jira_url,
                                                             project_key=project_key,
+                                                            project_name=project_name,
                                                             board_ids=board_ids,
                                                             jira_username=jira_username,
-                                                            jira_token=jira_token)
+                                                            jira_token=jira_token,
+                                                            project_id=project_id)
 
     result = {'result': {
         'projectKey': project_key,
