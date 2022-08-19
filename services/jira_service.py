@@ -36,7 +36,19 @@ def create_project_from_template(jira_url: str, project_key: str, project_name: 
     if response.status_code != 200:
         raise Exception(f"Project creation failed {response.text}")
 
-    return f"{jira_url}/{response.json()['returnUrl']}", response.json()['projectId']
+    project_url = f"{jira_url}/{response.json()['returnUrl']}"
+    project_id = response.json()['projectId']
+
+    payload = {
+        "user": [jira_username]
+    }
+
+    response = requests.post(f"{jira_url}/rest/api/2/project/{project_key}/role/10002", json=payload, headers=HEADERS,
+                             auth=authentication)
+    if response.status_code != 200:
+        raise Exception(f"Failed to add bot user as admin to project. {response.status_code}")
+
+    return project_url, project_id
 
 
 def copy_board_from_template(jira_url: str, project_key: str, project_name: str, board_ids: list, jira_username: str,
@@ -51,7 +63,7 @@ def copy_board_from_template(jira_url: str, project_key: str, project_name: str,
         board_url = f"{jira_url}/rest/greenhopper/1.0/rapidview/{board_id}/"
         response = requests.get(board_url, headers=HEADERS, auth=authentication)
         if response.status_code != 200:
-            raise Exception(f"Reading board name failed {response.text}")
+            raise Exception(f"Failed to read board name {response.text}")
 
         board_name = f"{project_key} {response.json()['name']}"
         log.info("Creating board %s", board_name)
@@ -61,7 +73,7 @@ def copy_board_from_template(jira_url: str, project_key: str, project_name: str,
         copy_board_url = f"{board_url}copy"
         response = requests.put(copy_board_url, json=payload, headers=HEADERS, auth=authentication)
         if response.status_code != 200:
-            raise Exception(f"Board creation failed {response.text}")
+            raise Exception(f"Failed to copy board {response.text}")
         result.append(board_name)
 
         board_id = response.json()['id']
@@ -69,7 +81,7 @@ def copy_board_from_template(jira_url: str, project_key: str, project_name: str,
         update_board_url = f"{jira_url}/rest/greenhopper/1.0/rapidviewconfig/name"
         response = requests.put(update_board_url, json=payload, headers=HEADERS, auth=authentication)
         if response.status_code != 200:
-            raise Exception(f"Board creation failed {response.text}")
+            raise Exception(f"Failed to rename board {response.text}")
 
         log.info("Creating filters")
 
@@ -112,6 +124,15 @@ def copy_board_from_template(jira_url: str, project_key: str, project_name: str,
                                  auth=authentication)
         if response.status_code != 201:
             raise Exception(f"Failed to add edit permissions to filter {response.text}")
+
+        payload = {
+            "id": board_id,
+            "savedFilterId": filter_id
+        }
+        response = requests.put(f"{jira_url}/rest/greenhopper/1.0/rapidviewconfig/filter", json=payload, headers=HEADERS, auth=authentication)
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to update filter to board {response.status_code}")
 
     return result
 
