@@ -19,15 +19,15 @@ root.addHandler(log_handler)
 
 if __name__ == '__main__':
 
-    jira_url = get_parameter('JIRA_URL', True)
-    project_key = get_parameter('PROJECT_KEY', True)
-    project_name = get_parameter('PROJECT_NAME', True)
-    project_lead = get_parameter('PROJECT_LEAD', False)
-    jira_project_type = get_parameter('JIRA_PROJECT_TYPE', True)
-    template_project_id = get_parameter('TEMPLATE_PROJECT_ID', True)
-    template_board_ids = get_parameter('TEMPLATE_BOARD_IDS', False)
-    jira_username = get_parameter('JIRA_USERNAME', True)
-    jira_token = get_parameter('JIRA_TOKEN', True)
+    jira_url = get_parameter('JIRA_URL', True)                          # Jira URL address
+    project_key = get_parameter('PROJECT_KEY', True)                    # Project key for the new Jira project
+    project_name = get_parameter('PROJECT_NAME', True)                  # Project name
+    project_lead = get_parameter('PROJECT_LEAD', False)                 # Project lead jira user name
+    jira_project_type = get_parameter('JIRA_PROJECT_TYPE', True)        # Jira project type (selected from a list) JIRA_BUSINESS_PROJECT now creates also the boerds, anything else: default
+    template_project_id = get_parameter('TEMPLATE_PROJECT_ID', True)    # Jira id of the project used as an template (can be selected from the Organisation settings)
+    template_board_ids = get_parameter('TEMPLATE_BOARD_IDS', False)     # Jira ids (comma separated) of the board used as an template (can be selected from the Organisation settings)
+    jira_username = get_parameter('JIRA_USERNAME', True)                # Jira use name that will be used to create the project in Jira
+    jira_token = get_parameter('JIRA_TOKEN', True)                      # Jira personal access token (PAT) that will be used to authenticate
 
     if project_lead is None:
         project_lead = jira_username
