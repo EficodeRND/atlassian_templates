@@ -31,4 +31,15 @@ def create_empty_workspace(confluence_url: str, project_key: str, project_name: 
     if response.status_code != 200:
         raise Exception(f"Space creation failed: {response.text}")
 
+    payload = {
+        "children":
+        [
+            {"key": project_key, "type": "space"}
+        ]
+    }
+
+    url = f"{confluence_url}/rest/refinedtheme/2.0/category/move-children?newKey={category}"
+    response = requests.put(url, json=payload, headers=HEADERS, auth=authentication)
+    log.info(response.text)
+
     return f"{confluence_url}/rest/space"
