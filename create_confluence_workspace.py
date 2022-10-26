@@ -24,9 +24,11 @@ if __name__ == '__main__':
     confluence_username = get_parameter('CONFLUENCE_USERNAME', True)    # Confluence username for user that will create a space
     confluence_token = get_parameter('CONFLUENCE_TOKEN', True)          # Confluence personal access token (PAT) that will be used to authenticate
     category = get_parameter('CATEGORY', True)                          # Category for the space
+    user_group = get_parameter('USER_GROUP', True)                       # name of the user group for permissions
 
     workspace_url = confluence_service.create_empty_workspace(confluence_url=confluence_url, project_key=project_key,
                                                               project_name=project_name,
                                                               confluence_username=confluence_username,
                                                               confluence_token=confluence_token,
-                                                              category=category)
+                                                              category=category,
+                                                              user_group=user_group)
