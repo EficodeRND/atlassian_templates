@@ -18,15 +18,17 @@ log_handler.setFormatter(formatter)
 root.addHandler(log_handler)
 
 if __name__ == '__main__':
-    confluence_url = get_parameter('CONFLUENCE_URL', True)              # Confluence URL address
-    project_key = get_parameter('PROJECT_KEY', True)                    # Project/space key
-    project_name = get_parameter('PROJECT_NAME', True)                  # Project/space name
-    confluence_username = get_parameter('CONFLUENCE_USERNAME', True)    # Confluence username for user that will create a space
-    confluence_token = get_parameter('CONFLUENCE_TOKEN', True)          # Confluence personal access token (PAT) that will be used to authenticate
-    category = get_parameter('CATEGORY', True)                          # Category for the space
-    user_group = get_parameter('USER_GROUP', True)                       # name of the user group for permissions
+    confluence_url = get_parameter('CONFLUENCE_URL')                    # Confluence URL address
+    project_key = get_parameter('PROJECT_KEY')                          # Project/space key
+    project_name = get_parameter('PROJECT_NAME')                        # Project/space name
+    project_lead = get_parameter("PROJECT_LEAD")                        # Project lead Confluence username
+    confluence_username = get_parameter('CONFLUENCE_USERNAME')          # Confluence username for user that will create a space
+    confluence_token = get_parameter('CONFLUENCE_TOKEN')                # Confluence personal access token (PAT) that will be used to authenticate
+    category = get_parameter('CATEGORY')                                # Category for the space
+    user_group = get_parameter('USER_GROUP')                            # name of the user group for permissions
+    template_space_key = get_parameter('TEMPLATE_SPACE_KEY', False)     # ID for template space
 
-    workspace_url = confluence_service.create_empty_workspace(confluence_url=confluence_url, project_key=project_key,
+    workspace_url = confluence_service.create_confluence_workspace(confluence_url=confluence_url, project_key=project_key,
                                                               project_name=project_name,
                                                               confluence_username=confluence_username,
                                                               confluence_token=confluence_token,
