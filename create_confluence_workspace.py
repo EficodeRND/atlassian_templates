@@ -29,8 +29,10 @@ if __name__ == '__main__':
     template_space_key = get_parameter('TEMPLATE_SPACE_KEY', False)     # ID for template space
 
     workspace_url = confluence_service.create_confluence_workspace(confluence_url=confluence_url, project_key=project_key,
-                                                              project_name=project_name,
-                                                              confluence_username=confluence_username,
-                                                              confluence_token=confluence_token,
-                                                              category=category,
-                                                              user_group=user_group)
+                                                                   project_name=project_name,
+                                                                   confluence_username=confluence_username,
+                                                                   confluence_token=confluence_token,
+                                                                   category=category,
+                                                                   user_group=user_group,
+                                                                   template_space_key=template_space_key,
+                                                                   project_lead=project_lead)
